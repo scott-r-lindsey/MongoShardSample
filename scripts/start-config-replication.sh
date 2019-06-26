@@ -29,15 +29,15 @@ docker exec -i mongo-cluster-config1-container mongo --port 27019 << EOM
       members: [
         {
          _id: 0,
-         host: "mongo-config-1:27019"
+         host: "config-1:27019"
         },
         {
          _id: 1,
-         host: "mongo-config-2:27019"
+         host: "config-2:27019"
         },
         {
          _id: 2,
-         host: "mongo-config-3:27019"
+         host: "config-3:27019"
         }
        ]
     }

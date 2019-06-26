@@ -1,117 +1,134 @@
-version: '3'
+version: '3.4'
+
+# -----------------------------------------------------------------------------
+# "extensions", these are extended by the containers below
+x-config: &config
+    image: mongo:4
+    expose: ["27019"]
+    command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
+    networks:
+        - mongozone
+
+x-shard: &shard
+    image: mongo:4
+    networks:
+        - mongozone
+    expose: ["27018"]
+
+x-alpha: &alpha
+    <<: *shard
+    command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
+
+x-beta: &beta
+    <<: *shard
+    command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
+
+x-gamma: &gamma
+    <<: *shard
+    command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
+
+# -----------------------------------------------------------------------------
+
 services:
 
-    # config servers
-
-    mongo-config-1:
+    config-1:
+        <<: *config
         container_name: mongo-cluster-config1-container
-        image: mongo:4
-        command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
         volumes:
             - "./volumes/config1/configdb:/data/configdb"
-        expose: ["27019"]
+            - "./keys/config-1:/data/ssl"
 
-    mongo-config-2:
+    config-2:
+        <<: *config
         container_name: mongo-cluster-config2-container
-        image: mongo:4
-        command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
         volumes:
             - "./volumes/config2/configdb:/data/configdb"
-        expose: ["27019"]
+            - "./keys/config-2:/data/ssl"
 
-    mongo-config-3:
+    config-3:
+        <<: *config
         container_name: mongo-cluster-config3-container
-        image: mongo:4
-        command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
         volumes:
             - "./volumes/config3/configdb:/data/configdb"
-        expose: ["27019"]
+            - "./keys/config-3:/data/ssl"
 
 
     # shard set alpha
-    alpha-shard-1:
+    alpha-1:
+        <<: *alpha
         container_name: mongo-cluster-alpha1-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
         volumes:
             - "./volumes/alpha1/data:/data/db"
-        expose: ["27018"]
+            - "./keys/alpha-1:/data/ssl"
 
-    alpha-shard-2:
+    alpha-2:
+        <<: *alpha
         container_name: mongo-cluster-alpha2-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
         volumes:
             - "./volumes/alpha2/data:/data/db"
-        expose: ["27018"]
+            - "./keys/alpha-2:/data/ssl"
 
-    alpha-shard-3:
+    alpha-3:
+        <<: *alpha
         container_name: mongo-cluster-alpha3-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
         volumes:
             - "./volumes/alpha3/data:/data/db"
-        expose: ["27018"]
+            - "./keys/alpha-3:/data/ssl"
 
     # shard set beta
-    beta-shard-1:
+    beta-1:
+        <<: *beta
         container_name: mongo-cluster-beta1-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
         volumes:
             - "./volumes/beta1/data:/data/db"
-        expose: ["27018"]
+            - "./keys/beta-1:/data/ssl"
 
-    beta-shard-2:
+    beta-2:
+        <<: *beta
         container_name: mongo-cluster-beta2-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
         volumes:
             - "./volumes/beta2/data:/data/db"
-        expose: ["27018"]
+            - "./keys/beta-2:/data/ssl"
 
-    beta-shard-3:
+    beta-3:
+        <<: *beta
         container_name: mongo-cluster-beta3-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
         volumes:
             - "./volumes/beta3/data:/data/db"
-        expose: ["27018"]
+            - "./keys/beta-3:/data/ssl"
 
-    # shard set alpha
-    gamma-shard-1:
+    # shard set gamma
+    gamma-1:
+        <<: *gamma
         container_name: mongo-cluster-gamma1-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
         volumes:
             - "./volumes/gamma1/data:/data/db"
-        expose: ["27018"]
+            - "./keys/gamma-1:/data/ssl"
 
-    gamma-shard-2:
+    gamma-2:
+        <<: *gamma
         container_name: mongo-cluster-gamma2-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
         volumes:
             - "./volumes/gamma2/data:/data/db"
-        expose: ["27018"]
+            - "./keys/gamma-2:/data/ssl"
 
-    gamma-shard-3:
+    gamma-3:
+        <<: *gamma
         container_name: mongo-cluster-gamma3-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
         volumes:
             - "./volumes/gamma3/data:/data/db"
-        expose: ["27018"]
+            - "./keys/gamma-3:/data/ssl"
 
     mongos-1:
         container_name: mongo-shard-router-1
         image: mongo:4
+        networks:
+            - mongozone
         command:
             - "mongos"
             - "--configdb"
-            - "configReplicationSet/mongo-config-1:27019,mongo-config-2:27019,mongo-config-3:27019"
+            - "configReplicationSet/config-1:27019,config-2:27019,config-3:27019"
             - "--bind_ip=0.0.0.0"
-
 
 networks:
     mongozone:
