@@ -11,6 +11,7 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
 
 #------------------------------------------------------------------------------
 
@@ -24,7 +25,15 @@ red "> rs.conf()"
 sleep 1
 
 start_teal
-docker exec -i mongo-cluster-beta1-container mongo --port 27018 --eval "rs.conf()"
+docker exec -i mongo-cluster-beta1-container mongo \
+    --port 27018 \
+    --ssl \
+    --sslAllowInvalidHostnames \
+    --sslPEMKeyFile /data/ssl/secret.pem \
+    --sslCAFile /data/ssl/mongoCA.crt \
+    --authenticationMechanism=MONGODB-X509 \
+    --authenticationDatabase='$external' \
+    --eval "rs.conf()"
 end_color
 
 green "-------------------------------------------------------------------------------"

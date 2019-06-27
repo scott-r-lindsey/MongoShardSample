@@ -2,30 +2,107 @@ version: '3.4'
 
 # -----------------------------------------------------------------------------
 # "extensions", these are extended by the containers below
-x-config: &config
+x-base: &base
     image: mongo:4
-    expose: ["27019"]
-    command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
     networks:
         - mongozone
 
+x-config: &config
+    <<: *base
+    expose: ["27019"]
+    command:
+        - "mongod"
+        - "--configsvr"
+        - "--sslMode"
+        - "preferSSL"
+        - "--auth"
+        - "--sslPEMKeyFile"
+        - "/data/ssl/secret.pem"
+        - "--sslCAFile"
+        - "/data/ssl/mongoCA.crt"
+        - "--sslClusterFile"
+        - "/data/ssl/secret.pem"
+        - "--sslPEMKeyPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--sslClusterPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--clusterAuthMode"
+        - "x509"
+        - "--replSet"
+        - "configReplicationSet"
+
 x-shard: &shard
-    image: mongo:4
-    networks:
-        - mongozone
+    <<: *base
     expose: ["27018"]
 
 x-alpha: &alpha
     <<: *shard
-    command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
+    command:
+        - "mongod"
+        - "--shardsvr"
+        - "--sslMode"
+        - "preferSSL"
+        - "--auth"
+        - "--sslPEMKeyFile"
+        - "/data/ssl/secret.pem"
+        - "--sslCAFile"
+        - "/data/ssl/mongoCA.crt"
+        - "--sslClusterFile"
+        - "/data/ssl/secret.pem"
+        - "--sslPEMKeyPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--sslClusterPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--clusterAuthMode"
+        - "x509"
+        - "--replSet"
+        - "alphaReplicationSet"
 
 x-beta: &beta
     <<: *shard
-    command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
+    command:
+        - "mongod"
+        - "--shardsvr"
+        - "--sslMode"
+        - "preferSSL"
+        - "--auth"
+        - "--sslPEMKeyFile"
+        - "/data/ssl/secret.pem"
+        - "--sslCAFile"
+        - "/data/ssl/mongoCA.crt"
+        - "--sslClusterFile"
+        - "/data/ssl/secret.pem"
+        - "--sslPEMKeyPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--sslClusterPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--clusterAuthMode"
+        - "x509"
+        - "--replSet"
+        - "betaReplicationSet"
 
 x-gamma: &gamma
     <<: *shard
-    command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
+    command:
+        - "mongod"
+        - "--shardsvr"
+        - "--sslMode"
+        - "preferSSL"
+        - "--auth"
+        - "--sslPEMKeyFile"
+        - "/data/ssl/secret.pem"
+        - "--sslCAFile"
+        - "/data/ssl/mongoCA.crt"
+        - "--sslClusterFile"
+        - "/data/ssl/secret.pem"
+        - "--sslPEMKeyPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--sslClusterPassword"
+        - "${SSL_PEM_PASSWORD}"
+        - "--clusterAuthMode"
+        - "x509"
+        - "--replSet"
+        - "gammaReplicationSet"
 
 # -----------------------------------------------------------------------------
 
@@ -35,100 +112,83 @@ services:
         <<: *config
         container_name: mongo-cluster-config1-container
         volumes:
-            - "./volumes/config1/configdb:/data/configdb"
-            - "./keys/config-1:/data/ssl"
+            - "./volumes/config-1:/data"
 
     config-2:
         <<: *config
         container_name: mongo-cluster-config2-container
         volumes:
-            - "./volumes/config2/configdb:/data/configdb"
-            - "./keys/config-2:/data/ssl"
+            - "./volumes/config-2:/data"
 
     config-3:
         <<: *config
         container_name: mongo-cluster-config3-container
         volumes:
-            - "./volumes/config3/configdb:/data/configdb"
-            - "./keys/config-3:/data/ssl"
+            - "./volumes/config-3:/data"
 
-
-    # shard set alpha
     alpha-1:
         <<: *alpha
         container_name: mongo-cluster-alpha1-container
         volumes:
-            - "./volumes/alpha1/data:/data/db"
-            - "./keys/alpha-1:/data/ssl"
+            - "./volumes/alpha-1:/data"
 
     alpha-2:
         <<: *alpha
         container_name: mongo-cluster-alpha2-container
         volumes:
-            - "./volumes/alpha2/data:/data/db"
-            - "./keys/alpha-2:/data/ssl"
+            - "./volumes/alpha-2:/data"
 
     alpha-3:
         <<: *alpha
         container_name: mongo-cluster-alpha3-container
         volumes:
-            - "./volumes/alpha3/data:/data/db"
-            - "./keys/alpha-3:/data/ssl"
+            - "./volumes/alpha-3:/data"
 
-    # shard set beta
     beta-1:
         <<: *beta
         container_name: mongo-cluster-beta1-container
         volumes:
-            - "./volumes/beta1/data:/data/db"
-            - "./keys/beta-1:/data/ssl"
+            - "./volumes/beta-1:/data"
 
     beta-2:
         <<: *beta
         container_name: mongo-cluster-beta2-container
         volumes:
-            - "./volumes/beta2/data:/data/db"
-            - "./keys/beta-2:/data/ssl"
+            - "./volumes/beta-2:/data"
 
     beta-3:
         <<: *beta
         container_name: mongo-cluster-beta3-container
         volumes:
-            - "./volumes/beta3/data:/data/db"
-            - "./keys/beta-3:/data/ssl"
+            - "./volumes/beta-3:/data"
 
-    # shard set gamma
     gamma-1:
         <<: *gamma
         container_name: mongo-cluster-gamma1-container
         volumes:
-            - "./volumes/gamma1/data:/data/db"
-            - "./keys/gamma-1:/data/ssl"
+            - "./volumes/gamma-1:/data"
 
     gamma-2:
         <<: *gamma
         container_name: mongo-cluster-gamma2-container
         volumes:
-            - "./volumes/gamma2/data:/data/db"
-            - "./keys/gamma-2:/data/ssl"
+            - "./volumes/gamma-2:/data"
 
     gamma-3:
         <<: *gamma
         container_name: mongo-cluster-gamma3-container
         volumes:
-            - "./volumes/gamma3/data:/data/db"
-            - "./keys/gamma-3:/data/ssl"
-
-    mongos-1:
-        container_name: mongo-shard-router-1
-        image: mongo:4
-        networks:
-            - mongozone
-        command:
-            - "mongos"
-            - "--configdb"
-            - "configReplicationSet/config-1:27019,config-2:27019,config-3:27019"
-            - "--bind_ip=0.0.0.0"
+            - "./volumes/gamma-3:/data"
+#
+#    mongos-1:
+#        <<: *base
+#        container_name: mongo-shard-router-1
+#        command:
+#            - "mongos"
+#            - "--configdb"
+#            - "configReplicationSet/config-1:27019,config-2:27019,config-3:27019"
+#            - "--bind_ip=0.0.0.0"
+#
 
 networks:
     mongozone:

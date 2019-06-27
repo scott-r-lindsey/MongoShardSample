@@ -11,10 +11,18 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
 
 #------------------------------------------------------------------------------
 
 cd $__root/keys
+
+if [ -e $__root/keys/mongoCA.key ]; then
+    green "-------------------------------------------------------------------------------"
+    green " CA Key is present"
+    green "-------------------------------------------------------------------------------"
+    exit 0;
+fi
 
 green "-------------------------------------------------------------------------------"
 green " Generating CA key "
@@ -73,5 +81,6 @@ do
         cat $HOST/key.key $HOST/crt.crt >$HOST/secret.pem
         cp mongoCA.crt $HOST/
 
+        mv $HOST $__root/volumes/$HOST/ssl
     done
 done

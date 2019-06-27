@@ -11,6 +11,7 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
 
 #------------------------------------------------------------------------------
 
@@ -29,15 +30,15 @@ docker exec -i mongo-cluster-alpha1-container mongo --port 27018 << EOM
       members: [
         {
          _id: 0,
-         host: "alpha-shard-1:27018"
+         host: "alpha-1:27018"
         },
         {
          _id: 1,
-         host: "alpha-shard-2:27018"
+         host: "alpha-2:27018"
         },
         {
          _id: 2,
-         host: "alpha-shard-3:27018"
+         host: "alpha-3:27018"
         }
        ]
     }
@@ -56,7 +57,15 @@ red "> rs.conf()"
 sleep 1
 
 start_teal
-docker exec -i mongo-cluster-alpha1-container mongo --port 27018 --eval "rs.conf()"
+docker exec -i mongo-cluster-alpha1-container mongo \
+    --port 27018 \
+    --ssl \
+    --sslAllowInvalidHostnames \
+    --sslPEMKeyFile /data/ssl/secret.pem \
+    --sslCAFile /data/ssl/mongoCA.crt \
+    --authenticationMechanism=MONGODB-X509 \
+    --authenticationDatabase='$external' \
+    --eval "rs.conf()"
 end_color
 
 green "-------------------------------------------------------------------------------"
