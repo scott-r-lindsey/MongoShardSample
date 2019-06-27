@@ -6,103 +6,17 @@ x-base: &base
     image: mongo:4
     networks:
         - mongozone
+    environment:
+        - SSL_PEM_PASSWORD=${SSL_PEM_PASSWORD}
+    command: ["/run.sh"]
 
 x-config: &config
     <<: *base
     expose: ["27019"]
-    command:
-        - "mongod"
-        - "--configsvr"
-        - "--sslMode"
-        - "preferSSL"
-        - "--auth"
-        - "--sslPEMKeyFile"
-        - "/data/ssl/secret.pem"
-        - "--sslCAFile"
-        - "/data/ssl/mongoCA.crt"
-        - "--sslClusterFile"
-        - "/data/ssl/secret.pem"
-        - "--sslPEMKeyPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--sslClusterPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--clusterAuthMode"
-        - "x509"
-        - "--replSet"
-        - "configReplicationSet"
 
 x-shard: &shard
     <<: *base
     expose: ["27018"]
-
-x-alpha: &alpha
-    <<: *shard
-    command:
-        - "mongod"
-        - "--shardsvr"
-        - "--sslMode"
-        - "preferSSL"
-        - "--auth"
-        - "--sslPEMKeyFile"
-        - "/data/ssl/secret.pem"
-        - "--sslCAFile"
-        - "/data/ssl/mongoCA.crt"
-        - "--sslClusterFile"
-        - "/data/ssl/secret.pem"
-        - "--sslPEMKeyPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--sslClusterPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--clusterAuthMode"
-        - "x509"
-        - "--replSet"
-        - "alphaReplicationSet"
-
-x-beta: &beta
-    <<: *shard
-    command:
-        - "mongod"
-        - "--shardsvr"
-        - "--sslMode"
-        - "preferSSL"
-        - "--auth"
-        - "--sslPEMKeyFile"
-        - "/data/ssl/secret.pem"
-        - "--sslCAFile"
-        - "/data/ssl/mongoCA.crt"
-        - "--sslClusterFile"
-        - "/data/ssl/secret.pem"
-        - "--sslPEMKeyPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--sslClusterPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--clusterAuthMode"
-        - "x509"
-        - "--replSet"
-        - "betaReplicationSet"
-
-x-gamma: &gamma
-    <<: *shard
-    command:
-        - "mongod"
-        - "--shardsvr"
-        - "--sslMode"
-        - "preferSSL"
-        - "--auth"
-        - "--sslPEMKeyFile"
-        - "/data/ssl/secret.pem"
-        - "--sslCAFile"
-        - "/data/ssl/mongoCA.crt"
-        - "--sslClusterFile"
-        - "/data/ssl/secret.pem"
-        - "--sslPEMKeyPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--sslClusterPassword"
-        - "${SSL_PEM_PASSWORD}"
-        - "--clusterAuthMode"
-        - "x509"
-        - "--replSet"
-        - "gammaReplicationSet"
 
 # -----------------------------------------------------------------------------
 
@@ -113,73 +27,85 @@ services:
         container_name: mongo-cluster-config1-container
         volumes:
             - "./volumes/config-1:/data"
+            - "./volumes/run-config.sh:/run.sh"
 
     config-2:
         <<: *config
         container_name: mongo-cluster-config2-container
         volumes:
             - "./volumes/config-2:/data"
+            - "./volumes/run-config.sh:/run.sh"
 
     config-3:
         <<: *config
         container_name: mongo-cluster-config3-container
         volumes:
             - "./volumes/config-3:/data"
+            - "./volumes/run-config.sh:/run.sh"
 
     alpha-1:
-        <<: *alpha
+        <<: *shard
         container_name: mongo-cluster-alpha1-container
         volumes:
             - "./volumes/alpha-1:/data"
+            - "./volumes/run-alpha.sh:/run.sh"
 
     alpha-2:
-        <<: *alpha
+        <<: *shard
         container_name: mongo-cluster-alpha2-container
         volumes:
             - "./volumes/alpha-2:/data"
+            - "./volumes/run-alpha.sh:/run.sh"
 
     alpha-3:
-        <<: *alpha
+        <<: *shard
         container_name: mongo-cluster-alpha3-container
         volumes:
             - "./volumes/alpha-3:/data"
+            - "./volumes/run-alpha.sh:/run.sh"
 
     beta-1:
-        <<: *beta
+        <<: *shard
         container_name: mongo-cluster-beta1-container
         volumes:
             - "./volumes/beta-1:/data"
+            - "./volumes/run-beta.sh:/run.sh"
 
     beta-2:
-        <<: *beta
+        <<: *shard
         container_name: mongo-cluster-beta2-container
         volumes:
             - "./volumes/beta-2:/data"
+            - "./volumes/run-beta.sh:/run.sh"
 
     beta-3:
-        <<: *beta
+        <<: *shard
         container_name: mongo-cluster-beta3-container
         volumes:
             - "./volumes/beta-3:/data"
+            - "./volumes/run-beta.sh:/run.sh"
 
     gamma-1:
-        <<: *gamma
+        <<: *shard
         container_name: mongo-cluster-gamma1-container
         volumes:
             - "./volumes/gamma-1:/data"
+            - "./volumes/run-gamma.sh:/run.sh"
 
     gamma-2:
-        <<: *gamma
+        <<: *shard
         container_name: mongo-cluster-gamma2-container
         volumes:
             - "./volumes/gamma-2:/data"
+            - "./volumes/run-gamma.sh:/run.sh"
 
     gamma-3:
-        <<: *gamma
+        <<: *shard
         container_name: mongo-cluster-gamma3-container
         volumes:
             - "./volumes/gamma-3:/data"
-#
+            - "./volumes/run-gamma.sh:/run.sh"
+
 #    mongos-1:
 #        <<: *base
 #        container_name: mongo-shard-router-1
