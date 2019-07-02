@@ -51,7 +51,7 @@ And you may use MongoAdmin at http://localhost:1234 after having run the setup s
 
 ## Thanks
 
-I could not have done this without the many guides already put together by members of the MongoDB community.  These links include:
+I could not have done this without the many guides already put together by members of the MongoDB community.  Some of the most helpful include:
 
 * https://medium.com/@rossbulat/deploy-a-3-node-mongodb-3-6-replica-set-with-x-509-authentication-self-signed-certificates-d539fda94db4
 * https://hackernoon.com/create-a-mongodb-sharded-cluster-with-ssl-enabled-dace56bc7a17
