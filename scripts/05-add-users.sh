@@ -11,53 +11,50 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
 
 #------------------------------------------------------------------------------
 
 green "-------------------------------------------------------------------------------"
-green " Initializing configuration replica set..."
+green " Adding admin user"
 green "-------------------------------------------------------------------------------"
-red "> rs.initiate( rsconf )"
-
-# dramatic pause
-sleep 1
 
 start_teal
-docker exec -i mongo-cluster-config1-container mongo --port 27019 << EOM
-    rsconf = {
-      _id: "configReplicationSet",
-      members: [
-        {
-         _id: 0,
-         host: "mongo-config-1:27019"
-        },
-        {
-         _id: 1,
-         host: "mongo-config-2:27019"
-        },
-        {
-         _id: 2,
-         host: "mongo-config-3:27019"
-        }
-       ]
-    }
-
-    rs.initiate( rsconf )
+docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
+db.getSiblingDB("admin").createUser(
+  {
+    user: "${ADMIN_USER}",
+    pwd: "${ADMIN_PASSWORD}",
+    roles: [
+      { role: "userAdminAnyDatabase", db: "admin" },
+      { role : "clusterAdmin", db : "admin" }
+    ],
+    writeConcern: { w: "majority" , wtimeout: 5000 }
+  }
+)
 EOM
-
 end_color
-green "-------------------------------------------------------------------------------"
-green " Validiation with rs.conf()"
-green "-------------------------------------------------------------------------------"
 
-red "> rs.conf()"
-
-# dramatic pause
-sleep 1
+green "-------------------------------------------------------------------------------"
+green " Adding applicaiton user"
+green "-------------------------------------------------------------------------------"
 
 start_teal
-docker exec -i mongo-cluster-config1-container mongo --port 27019 --eval "rs.conf()"
+docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
+db.getSiblingDB("admin").auth("${ADMIN_USER}", "${ADMIN_PASSWORD}");
+db.getSiblingDB("${APP_DATABASE}").createUser(
+  {
+    user: "${APP_USER}",
+    pwd: "${APP_PASSWORD}",
+    roles: [
+      { role: "readWrite", db: "${APP_DATABASE}" },
+    ],
+    writeConcern: { w: "majority" , wtimeout: 5000 }
+  }
+)
+EOM
 end_color
+
 
 green "-------------------------------------------------------------------------------"
 green " Done."

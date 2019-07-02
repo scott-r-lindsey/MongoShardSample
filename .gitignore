@@ -3,4 +3,6 @@
 *.old
 *~
 
+config.sh
 volumes/
+keys/

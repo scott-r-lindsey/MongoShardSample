@@ -1,116 +1,141 @@
-version: '3'
+version: '3.4'
+
+# -----------------------------------------------------------------------------
+# "extensions", these are extended by the containers below
+x-base: &base
+    image: mongo:4
+    networks:
+        - mongozone
+    environment:
+        - SSL_PEM_PASSWORD=${SSL_PEM_PASSWORD}
+    command: ["/run.sh"]
+
+x-config: &config
+    <<: *base
+    expose: ["27019"]
+
+x-shard: &shard
+    <<: *base
+    expose: ["${MONGOS_PORT}"]
+
+# -----------------------------------------------------------------------------
+
 services:
 
-    # config servers
-
-    mongo-config-1:
+    config-1:
+        <<: *config
         container_name: mongo-cluster-config1-container
-        image: mongo:4
-        command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
         volumes:
-            - "./volumes/config1/configdb:/data/configdb"
-        expose: ["27019"]
+            - "./volumes/config-1:/data"
+            - "./volumes/run-config.sh:/run.sh"
 
-    mongo-config-2:
+    config-2:
+        <<: *config
         container_name: mongo-cluster-config2-container
-        image: mongo:4
-        command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
         volumes:
-            - "./volumes/config2/configdb:/data/configdb"
-        expose: ["27019"]
+            - "./volumes/config-2:/data"
+            - "./volumes/run-config.sh:/run.sh"
 
-    mongo-config-3:
+    config-3:
+        <<: *config
         container_name: mongo-cluster-config3-container
-        image: mongo:4
-        command: ["mongod", "--configsvr", "--replSet", "configReplicationSet"]
         volumes:
-            - "./volumes/config3/configdb:/data/configdb"
-        expose: ["27019"]
+            - "./volumes/config-3:/data"
+            - "./volumes/run-config.sh:/run.sh"
 
-
-    # shard set alpha
-    alpha-shard-1:
+    alpha-1:
+        <<: *shard
         container_name: mongo-cluster-alpha1-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
         volumes:
-            - "./volumes/alpha1/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/alpha-1:/data"
+            - "./volumes/run-alpha.sh:/run.sh"
 
-    alpha-shard-2:
+    alpha-2:
+        <<: *shard
         container_name: mongo-cluster-alpha2-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
         volumes:
-            - "./volumes/alpha2/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/alpha-2:/data"
+            - "./volumes/run-alpha.sh:/run.sh"
 
-    alpha-shard-3:
+    alpha-3:
+        <<: *shard
         container_name: mongo-cluster-alpha3-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "alphaReplicationSet"]
         volumes:
-            - "./volumes/alpha3/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/alpha-3:/data"
+            - "./volumes/run-alpha.sh:/run.sh"
 
-    # shard set beta
-    beta-shard-1:
+    beta-1:
+        <<: *shard
         container_name: mongo-cluster-beta1-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
         volumes:
-            - "./volumes/beta1/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/beta-1:/data"
+            - "./volumes/run-beta.sh:/run.sh"
 
-    beta-shard-2:
+    beta-2:
+        <<: *shard
         container_name: mongo-cluster-beta2-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
         volumes:
-            - "./volumes/beta2/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/beta-2:/data"
+            - "./volumes/run-beta.sh:/run.sh"
 
-    beta-shard-3:
+    beta-3:
+        <<: *shard
         container_name: mongo-cluster-beta3-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "betaReplicationSet"]
         volumes:
-            - "./volumes/beta3/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/beta-3:/data"
+            - "./volumes/run-beta.sh:/run.sh"
 
-    # shard set alpha
-    gamma-shard-1:
+    gamma-1:
+        <<: *shard
         container_name: mongo-cluster-gamma1-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
         volumes:
-            - "./volumes/gamma1/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/gamma-1:/data"
+            - "./volumes/run-gamma.sh:/run.sh"
 
-    gamma-shard-2:
+    gamma-2:
+        <<: *shard
         container_name: mongo-cluster-gamma2-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
         volumes:
-            - "./volumes/gamma2/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/gamma-2:/data"
+            - "./volumes/run-gamma.sh:/run.sh"
 
-    gamma-shard-3:
+    gamma-3:
+        <<: *shard
         container_name: mongo-cluster-gamma3-container
-        image: mongo:4
-        command: ["mongod", "--shardsvr", "--replSet", "gammaReplicationSet"]
         volumes:
-            - "./volumes/gamma3/data:/data/db"
-        expose: ["27018"]
+            - "./volumes/gamma-3:/data"
+            - "./volumes/run-gamma.sh:/run.sh"
 
     mongos-1:
+        <<: *base
         container_name: mongo-shard-router-1
-        image: mongo:4
-        command:
-            - "mongos"
-            - "--configdb"
-            - "configReplicationSet/mongo-config-1:27019,mongo-config-2:27019,mongo-config-3:27019"
-            - "--bind_ip=0.0.0.0"
+        volumes:
+            - "./volumes/mongos-1:/data"
+            - "./volumes/run-mongos.sh:/run.sh"
+
+        ports:
+            - "${MONGOS_PORT}:27017"
+
+    adminmongo:
+        container_name: admin-mongo-container
+        image: mrvautin/adminmongo
+        environment:
+            - CONN_NAME=MONGOS
+            - DB_USERNAME=${APP_USER}
+            - DB_PASSWORD=${APP_PASSWORD}
+            - DB_HOST=mongos-1
+            - DB_PORT=27017
+            - DB_NAME=${APP_DATABASE}
+        ports:
+            - "${MONGO_ADMIN_PORT}:1234"
+        volumes:
+            - "./volumes/wait-for-mongo.js:/app/user/wait-for-mongo.js"
+            - "./volumes/mongoadminconfig.json:/app/user/config/app.json"
+        networks:
+            - mongozone
+        command: ["node", "wait-for-mongo.js"]
+
+
 
 
 networks:

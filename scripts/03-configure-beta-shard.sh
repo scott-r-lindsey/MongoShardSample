@@ -11,11 +11,12 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
 
 #------------------------------------------------------------------------------
 
 green "-------------------------------------------------------------------------------"
-green " Initializing alpha shard replica set..."
+green " Initializing beta shard replica set..."
 green "-------------------------------------------------------------------------------"
 red "> rs.initiate( rsconf )"
 
@@ -23,21 +24,21 @@ red "> rs.initiate( rsconf )"
 sleep 1
 
 start_teal
-docker exec -i mongo-cluster-alpha1-container mongo --port 27018 << EOM
+docker exec -i mongo-cluster-beta1-container mongo --port 27018 << EOM
     rsconf = {
-      _id: "alphaReplicationSet",
+      _id: "betaReplicationSet",
       members: [
         {
          _id: 0,
-         host: "alpha-shard-1:27018"
+         host: "beta-1:27018"
         },
         {
          _id: 1,
-         host: "alpha-shard-2:27018"
+         host: "beta-2:27018"
         },
         {
          _id: 2,
-         host: "alpha-shard-3:27018"
+         host: "beta-3:27018"
         }
        ]
     }
@@ -56,7 +57,15 @@ red "> rs.conf()"
 sleep 1
 
 start_teal
-docker exec -i mongo-cluster-alpha1-container mongo --port 27018 --eval "rs.conf()"
+docker exec -i mongo-cluster-beta1-container mongo \
+    --port 27018 \
+    --ssl \
+    --sslAllowInvalidHostnames \
+    --sslPEMKeyFile /data/ssl/secret.pem \
+    --sslCAFile /data/ssl/mongoCA.crt \
+    --authenticationMechanism=MONGODB-X509 \
+    --authenticationDatabase='$external' \
+    --eval "rs.conf()"
 end_color
 
 green "-------------------------------------------------------------------------------"

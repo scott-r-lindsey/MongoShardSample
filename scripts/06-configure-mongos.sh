@@ -11,6 +11,12 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
+
+#------------------------------------------------------------------------------
+
+
+
 
 #------------------------------------------------------------------------------
 
@@ -24,7 +30,8 @@ sleep 1
 
 start_teal
 docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
-    sh.addShard("alphaReplicationSet/alpha-shard-1:27018");
+    db.getSiblingDB("admin").auth("${ADMIN_USER}", "${ADMIN_PASSWORD}");
+    sh.addShard("alphaReplicationSet/alpha-1:27018");
 EOM
 
 green "-------------------------------------------------------------------------------"
@@ -37,7 +44,8 @@ sleep 1
 
 start_teal
 docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
-    sh.addShard("betaReplicationSet/beta-shard-1:27018");
+    db.getSiblingDB("admin").auth("${ADMIN_USER}", "${ADMIN_PASSWORD}");
+    sh.addShard("betaReplicationSet/beta-1:27018");
 EOM
 
 green "-------------------------------------------------------------------------------"
@@ -50,10 +58,9 @@ sleep 1
 
 start_teal
 docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
-    sh.addShard("gammaReplicationSet/gamma-shard-1:27018");
+    db.getSiblingDB("admin").auth("${ADMIN_USER}", "${ADMIN_PASSWORD}");
+    sh.addShard("gammaReplicationSet/gamma-1:27018");
 EOM
-
-
 
 green "-------------------------------------------------------------------------------"
 green " Done."

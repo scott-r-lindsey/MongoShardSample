@@ -11,52 +11,23 @@ __root="$__here/../"
 
 
 . $__here/lib/colors.sh
+. $__root/config.sh
 
 #------------------------------------------------------------------------------
 
 green "-------------------------------------------------------------------------------"
-green " Initializing beta shard replica set..."
+green " Creating sharded database "
 green "-------------------------------------------------------------------------------"
-red "> rs.initiate( rsconf )"
+red "> sh.enableSharding(\"${APP_DATABASE}\") "
 
 # dramatic pause
 sleep 1
 
 start_teal
-docker exec -i mongo-cluster-beta1-container mongo --port 27018 << EOM
-    rsconf = {
-      _id: "betaReplicationSet",
-      members: [
-        {
-         _id: 0,
-         host: "beta-shard-1:27018"
-        },
-        {
-         _id: 1,
-         host: "beta-shard-2:27018"
-        },
-        {
-         _id: 2,
-         host: "beta-shard-3:27018"
-        }
-       ]
-    }
-
-    rs.initiate( rsconf )
+docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
+    db.getSiblingDB("admin").auth("${ADMIN_USER}", "${ADMIN_PASSWORD}");
+    sh.enableSharding("${APP_DATABASE}")
 EOM
-
-end_color
-green "-------------------------------------------------------------------------------"
-green " Validiation with rs.conf()"
-green "-------------------------------------------------------------------------------"
-
-red "> rs.conf()"
-
-# dramatic pause
-sleep 1
-
-start_teal
-docker exec -i mongo-cluster-beta1-container mongo --port 27018 --eval "rs.conf()"
 end_color
 
 green "-------------------------------------------------------------------------------"

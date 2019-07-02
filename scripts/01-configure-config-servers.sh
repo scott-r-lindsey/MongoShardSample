@@ -16,7 +16,39 @@ __root="$__here/../"
 #------------------------------------------------------------------------------
 
 green "-------------------------------------------------------------------------------"
-green " Running rs.conf() on mongo-cluster-beta1-container"
+green " Initializing configuration replica set..."
+green "-------------------------------------------------------------------------------"
+red "> rs.initiate( rsconf )"
+
+# dramatic pause
+sleep 1
+
+start_teal
+docker exec -i mongo-cluster-config1-container mongo --port 27019 << EOM
+    rsconf = {
+      _id: "configReplicationSet",
+      members: [
+        {
+         _id: 0,
+         host: "config-1:27019"
+        },
+        {
+         _id: 1,
+         host: "config-2:27019"
+        },
+        {
+         _id: 2,
+         host: "config-3:27019"
+        }
+       ]
+    }
+
+    rs.initiate( rsconf )
+EOM
+
+end_color
+green "-------------------------------------------------------------------------------"
+green " Validiation with rs.conf()"
 green "-------------------------------------------------------------------------------"
 
 red "> rs.conf()"
@@ -25,8 +57,8 @@ red "> rs.conf()"
 sleep 1
 
 start_teal
-docker exec -i mongo-cluster-beta1-container mongo \
-    --port 27018 \
+docker exec -i mongo-cluster-config1-container mongo \
+    --port 27019 \
     --ssl \
     --sslAllowInvalidHostnames \
     --sslPEMKeyFile /data/ssl/secret.pem \
@@ -34,6 +66,7 @@ docker exec -i mongo-cluster-beta1-container mongo \
     --authenticationMechanism=MONGODB-X509 \
     --authenticationDatabase='$external' \
     --eval "rs.conf()"
+
 end_color
 
 green "-------------------------------------------------------------------------------"
