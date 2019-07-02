@@ -1,29 +1,50 @@
-### Mongo Shard Sample
+# Mongo Shard Sample
 
-This is an example mongodb cluster created locally via docker-compose.  This is an experiment and a playground -- 
+This is an example mongodb cluster created locally via docker-compose.  This is an experiment and a playground --
 this is not a sensible way to run a cluster of MongoDB servers.
 
-This will run on Linux machines with ```docker``` and ```docker-compose``` installed, and perhaps not other platforms
-(not currently tested).
+## Requirements
 
-After checking out the repository, run the start.sh command to bring up the cluster:
+This will run on Linux machines with ```docker```, ```docker-compose``` and openssl installed, and perhaps also on
+other platforms (not currently tested).
+
+## Setup
+
+After checking out the repository, copy config.sh.dist to config.sh, and edit this file.
+You may change any value -- in particular the port numbers may be worth changing if the 
+ports listed are already in use on your system.
+
+To bring up the cluster, run ./scripts/start.sh.
 ```bash
-./start.sh
+cd MongoShardSample
+./scripts/start.sh
 ```
-Then, run each of the following to initiate replication and add each shard to the cluster:
+SSL keys will be generated on the first execution of start.sh.  Next, run each of the 
+following commands to complete initialization of the cluster:
 ```bash
-./scripts/start-config-replication.sh
-./scripts/start-alpha-replication.sh
-./scripts/start-beta-replication.sh
-./scripts/start-gamma-replication.sh
-./scripts/add-shards-to-mongos.sh
+./scripts/01-configure-config-servers.sh
+./scripts/02-configure-alpha-shard.sh
+./scripts/03-configure-beta-shard.sh
+./scripts/04-configure-gamma-shard.sh
+./scripts/05-add-users.sh
+./scripts/06-configure-mongos.sh
+./scripts/07-create-sharded-database.sh
 ```
+
+## Use
+
 You may validate the status of each replication set with the following commands
 
 ```bash
-get-alpha-replication-status.sh
-get-beta-replication-status.sh
-get-config-replication-status.sh
-get-gamma-replication-status.sh
-get-mongos-status.sh
+./scripts/get-alpha-replication-status.sh
+./scripts/get-beta-replication-status.sh
+./scripts/get-config-replication-status.sh
+./scripts/get-gamma-replication-status.sh
+./scripts/get-mongos-status.sh
 ```
+
+To shell into the mongos instance, run
+```bash
+./scripts/sh-mongos-1
+```
+And you may use MongoAdmin at http://localhost:1234 after having run the setup scripts.
