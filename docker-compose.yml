@@ -16,7 +16,7 @@ x-config: &config
 
 x-shard: &shard
     <<: *base
-    expose: ["27018"]
+    expose: ["${MONGOS_PORT}"]
 
 # -----------------------------------------------------------------------------
 
@@ -106,15 +106,37 @@ services:
             - "./volumes/gamma-3:/data"
             - "./volumes/run-gamma.sh:/run.sh"
 
-#    mongos-1:
-#        <<: *base
-#        container_name: mongo-shard-router-1
-#        command:
-#            - "mongos"
-#            - "--configdb"
-#            - "configReplicationSet/config-1:27019,config-2:27019,config-3:27019"
-#            - "--bind_ip=0.0.0.0"
-#
+    mongos-1:
+        <<: *base
+        container_name: mongo-shard-router-1
+        volumes:
+            - "./volumes/mongos-1:/data"
+            - "./volumes/run-mongos.sh:/run.sh"
+
+        ports:
+            - "${MONGOS_PORT}:27017"
+
+    adminmongo:
+        container_name: admin-mongo-container
+        image: mrvautin/adminmongo
+        environment:
+            - CONN_NAME=MONGOS
+            - DB_USERNAME=${APP_USER}
+            - DB_PASSWORD=${APP_PASSWORD}
+            - DB_HOST=mongos-1
+            - DB_PORT=27017
+            - DB_NAME=${APP_DATABASE}
+        ports:
+            - "${MONGO_ADMIN_PORT}:1234"
+        volumes:
+            - "./volumes/wait-for-mongo.js:/app/user/wait-for-mongo.js"
+            - "./volumes/mongoadminconfig.json:/app/user/config/app.json"
+        networks:
+            - mongozone
+        command: ["node", "wait-for-mongo.js"]
+
+
+
 
 networks:
     mongozone:

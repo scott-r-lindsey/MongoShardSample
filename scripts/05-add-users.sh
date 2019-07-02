@@ -16,44 +16,44 @@ __root="$__here/../"
 #------------------------------------------------------------------------------
 
 green "-------------------------------------------------------------------------------"
-green " Adding alpha shard to mongos... "
+green " Adding admin user"
 green "-------------------------------------------------------------------------------"
-red "> sh.addShard( ... )"
-
-# dramatic pause
-sleep 1
 
 start_teal
 docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
-    sh.addShard("alphaReplicationSet/alpha-shard-1:27018");
+db.getSiblingDB("admin").createUser(
+  {
+    user: "${ADMIN_USER}",
+    pwd: "${ADMIN_PASSWORD}",
+    roles: [
+      { role: "userAdminAnyDatabase", db: "admin" },
+      { role : "clusterAdmin", db : "admin" }
+    ],
+    writeConcern: { w: "majority" , wtimeout: 5000 }
+  }
+)
 EOM
+end_color
 
 green "-------------------------------------------------------------------------------"
-green " Adding beta shard to mongos... "
+green " Adding applicaiton user"
 green "-------------------------------------------------------------------------------"
-red "> sh.addShard( ... )"
-
-# dramatic pause
-sleep 1
 
 start_teal
 docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
-    sh.addShard("betaReplicationSet/beta-shard-1:27018");
+db.getSiblingDB("admin").auth("${ADMIN_USER}", "${ADMIN_PASSWORD}");
+db.getSiblingDB("${APP_DATABASE}").createUser(
+  {
+    user: "${APP_USER}",
+    pwd: "${APP_PASSWORD}",
+    roles: [
+      { role: "readWrite", db: "${APP_DATABASE}" },
+    ],
+    writeConcern: { w: "majority" , wtimeout: 5000 }
+  }
+)
 EOM
-
-green "-------------------------------------------------------------------------------"
-green " Adding gamma shard to mongos... "
-green "-------------------------------------------------------------------------------"
-red "> sh.addShard( ... )"
-
-# dramatic pause
-sleep 1
-
-start_teal
-docker exec -i mongo-shard-router-1 mongo --port 27017 << EOM
-    sh.addShard("gammaReplicationSet/gamma-shard-1:27018");
-EOM
-
+end_color
 
 
 green "-------------------------------------------------------------------------------"

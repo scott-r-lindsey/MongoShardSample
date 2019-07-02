@@ -84,3 +84,40 @@ do
         mv $HOST $__root/volumes/$HOST/ssl
     done
 done
+
+### mongos by itself for now because I am only adding one to the cluster
+
+HOST="mongos-1"
+SUBJECT="/C=US/ST=Nowhere/L=Seattle/O=OrganisationName/OU=TestMongoBuild/CN=$HOST"
+mkdir $HOST;
+
+green "-------------------------------------------------------------------------------"
+green " Generating CSR for $HOST"
+green "-------------------------------------------------------------------------------"
+
+start_teal
+openssl req -new -nodes -newkey rsa:4096 \
+    -subj "$SUBJECT" \
+    -keyout $HOST/key.key \
+    -out $HOST/csr.csr
+end_color
+
+green "-------------------------------------------------------------------------------"
+green " Generating certificate for $HOST"
+green "-------------------------------------------------------------------------------"
+
+start_teal
+openssl x509 \
+    -passin pass:NOTSECURE \
+    -CA mongoCA.crt \
+    -CAkey mongoCA.key \
+    -CAcreateserial \
+    -req -days 365 \
+    -in $HOST/csr.csr \
+    -out $HOST/crt.crt
+end_color
+
+cat $HOST/key.key $HOST/crt.crt >$HOST/secret.pem
+cp mongoCA.crt $HOST/
+
+mv $HOST $__root/volumes/$HOST/ssl
