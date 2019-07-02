@@ -10,7 +10,7 @@ other platforms (not currently tested).
 
 ## Setup
 
-After checking out the repository, copy config.sh.dist to config.sh, and edit this file.
+After checking out the repository, copy ```config.sh.dist``` to ```config.sh```, and edit to your liking.
 You may change any value -- in particular the port numbers may be worth changing if the 
 ports listed are already in use on your system.
 
