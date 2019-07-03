@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+#------------------------------------------------------------------------------
+set -o pipefail
+set -e
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+__here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+__root="$__here/../"
+
+
+. $__here/lib/colors.sh
+. $__root/config.sh
+
+#------------------------------------------------------------------------------
+
+start_teal
+docker exec -i mongo-mgodatagen mgodatagen \
+    -h, --host=mongos-1 \
+    -u, --username=${ADMIN_USER} \
+    -p, --password=${ADMIN_PASSWORD} \
+    "$@"
+end_color
