@@ -121,8 +121,8 @@ services:
         image: mrvautin/adminmongo
         environment:
             - CONN_NAME=MONGOS
-            - DB_USERNAME=${APP_USER}
-            - DB_PASSWORD=${APP_PASSWORD}
+            - DB_USERNAME=${ADMIN_USER}
+            - DB_PASSWORD=${ADMIN_PASSWORD}
             - DB_HOST=mongos-1
             - DB_PORT=27017
             - DB_NAME=${APP_DATABASE}
@@ -135,7 +135,16 @@ services:
             - mongozone
         command: ["node", "wait-for-mongo.js"]
 
-
+    mgodatagen:
+        container_name: mongo-mgodatagen
+        build: docker/mgodatagen
+        networks:
+            - mongozone
+        environment:
+            - DB_USERNAME=${APP_USER}
+            - DB_PASSWORD=${APP_PASSWORD}
+        volumes:
+            - "./volumes/mgodatagen:/testdata"
 
 
 networks:
