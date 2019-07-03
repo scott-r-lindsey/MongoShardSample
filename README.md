@@ -52,7 +52,7 @@ And you may use MongoAdmin at http://localhost:1234 after having run the setup s
 
 ## Data Generation
 
-Random data can be inserted via (mgodatagen)[https://github.com/feliixx/mgodatagen] (present by way of docker).  To insert some data, run:
+Random data can be inserted via [mgodatagen](https://github.com/feliixx/mgodatagen) (present by way of docker).  To insert some data, run:
 ```bash
 ./mgodatagen-via-docker -f /testdata/big.json
 ```
