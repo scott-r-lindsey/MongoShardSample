@@ -2,8 +2,11 @@
 ## These passwords don't matter because you're never, ever going to
 ## expose this docker config to the outside world, right?
 
-export MONGO_INITDB_ROOT_USERNAME=myapp
-export MONGO_INITDB_ROOT_PASSWORD=PASSWORD123
-export ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-export ME_CONFIG_MONGODB_ADMINPASSWORD=SUPERSECURE
 export SSL_PEM_PASSWORD=NOTSECURE
+export ADMIN_USER=admin
+export ADMIN_PASSWORD=ADMPASS
+export APP_USER=myapp
+export APP_PASSWORD=SOMEPASSWORD
+export APP_DATABASE=demoappdb
+export MONGOS_PORT=27017
+export MONGO_ADMIN_PORT=1234
