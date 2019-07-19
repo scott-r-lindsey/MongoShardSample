@@ -118,7 +118,7 @@ services:
 
     adminmongo:
         container_name: admin-mongo-container
-        image: mrvautin/adminmongo
+        image: gbhrdt/adminmongo
         environment:
             - CONN_NAME=MONGOS
             - DB_USERNAME=${ADMIN_USER}
