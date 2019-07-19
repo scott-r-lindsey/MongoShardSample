@@ -39,7 +39,9 @@ db.getSiblingDB("${APP_DATABASE}").createUser(
     user: "${ADMIN_USER}",
     pwd: "${ADMIN_PASSWORD}",
     roles: [
-      { role: "dbOwner", db: "${APP_DATABASE}" },
+      { role: "dbOwner", db: "admin" },
+      { role: "clusterMonitor", db:"admin"}
+
     ],
     writeConcern: { w: "majority" , wtimeout: 5000 }
   }
